@@ -1,0 +1,18 @@
+{:deps {org.clojure/clojure                         {:mvn/version "1.10.0"}
+        org.clojure/clojurescript                   {:mvn/version "1.10.339"}
+        reagent                                     {:mvn/version "0.8.1"}
+        cljs-ajax                                   {:mvn/version "0.8.0"}
+        com.cognitect/transit-cljs                  {:mvn/version "0.8.256"}
+        com.bhauman/rebel-readline-cljs             {:mvn/version "0.1.4"}
+        com.bhauman/figwheel-main                   {:mvn/version "0.2.0"}}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" chess.test-runner]}}}
+
+;; TO start cljs repl in Cider:
+;; 1. Make sure figwheel-main is NOT running in terminal
+;; 2. M-x cider-jack-in-cljs RET
+;; 3. When prompted to select REPL type, Figwheel-main
+;; 4. When prompted for build alias, DO NOT HIT ENTER! type dev (no keyword).
