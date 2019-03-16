@@ -10,8 +10,10 @@
 
 (defn page [state]
   [:div
-   [:div (str (:legal-move? @state))]
-   [:div (str (:move @state))]
+   [:div (str (dissoc @state :board))]
+   ;; [:div (str (:round @state))]
+   ;; [:div (str (:color @state))]
+   ;; [:div (str (:move @state))]
    [:div (if (not= {} (:board @state)) (views/board (:board @state)) "click START GAME to begin")]
    [:button {:onClick #(state/update-start!)} "START GAME"]
    ])

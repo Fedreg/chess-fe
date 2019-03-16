@@ -18,7 +18,10 @@
   (r/atom
    {:board       {}
     :move        []
-    :legal-move? true
+    :round       1
+    :color       :white
+    :kills       nil
+    :points      nil
     }))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,15 +34,28 @@
 
 (defn start-handler [res]
   (let [clean-res (deserialize res)]
-    (swap! app-state assoc :board       clean-res
-                           :move        []
-                           :legal-move? true)))
+    (swap! app-state assoc
+           :board  (:board  clean-res)
+           :round  (:round  clean-res)
+           :points (:points clean-res)
+           :kills  (:kills  clean-res)
+           :move   []
+           :round  1
+           :color  :white)))
 
-(defn move-handler [res]
+(defn move-handler [res sx sy]
   (let [clean-res (deserialize res)]
-    (if (= :illegal clean-res)
-      (swap! app-state assoc :legal-move? false)
-      (swap! app-state assoc :board clean-res :legal-move? true))))
+    (println "MH" sx sy clean-res)
+    (when (not= :illegal clean-res)
+      (swap!
+       app-state #(-> %
+                      (assoc-in  [:move  ] [])
+                      (assoc-in  [:round ] (:round  clean-res))
+                      (assoc-in  [:points] (:points clean-res))
+                      (assoc-in  [:kills ] (:kills  clean-res))
+                      (assoc-in  [:board ] (:board  clean-res))
+                      (update-in [:color ] (fn [] (if (= :white (:color @app-state)) :black :white)))
+                      (assoc-in  [:board sx sy :clicked?] false))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HTTP
@@ -47,12 +63,14 @@
 
 (defn start-game []
   (ajax/GET (str HOST "start")
-            {:handler #(start-handler %)}))
+            {:handler #(start-handler %)
+             :api     (js/XMLHttpRequest.)}))
 
-(defn move [param]
+(defn move [param sx sy]
   (ajax/GET (str HOST "move")
-    {:params {:xy param}
-     :handler #(move-handler %)}))
+    {:params  {:xy param}
+     :api     (js/XMLHttpRequest.)
+     :handler #(move-handler % sx sy)}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; UPDATE
@@ -72,12 +90,18 @@
       (println "EMPTY")
 
       (and (= 0 (count move-arr))
-           (not= "" (get-in @app-state [:board x y])))
+           (not= "" (get-in @app-state [:board x y]))
+           (= (:color @app-state) (get-in @app-state [:board x y :color])))
       (let [val {:id id :x x :y y}]
-        (println "FIRST CLICK")
         (swap! app-state #(-> %
                               (update-in [:move] conj val)
                               (assoc-in  [:board x y :clicked?] true))))
+
+      (and
+       (= 0 (count move-arr))
+       (not= (:color @app-state)
+             (get-in @app-state [:board x y :color])))
+      (println "ILLEGAL")
 
       :else
       (let [sx  (-> move-arr first :x name)
@@ -86,13 +110,7 @@
             ex  (name x)
             ey  (name y)
             req (str sx sy ex ey)]
-      (println "SECOND CLICK")
-        (move req)
-        (println "MOVE LEG?" (:legal-move? @app-state) sx sy id ex ey req)
-        (when (:legal-move? @app-state)
-          (swap! app-state #(-> %
-                                (assoc-in [:move] [])
-                                (assoc-in [:board sx sy :clicked?] false))))))))
+        (move req sx sy)))))
 
 (comment
 
