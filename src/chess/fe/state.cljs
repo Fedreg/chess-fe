@@ -45,7 +45,6 @@
 
 (defn move-handler [res sx sy]
   (let [clean-res (deserialize res)]
-    (println "MH" sx sy clean-res)
     (when (not= :illegal clean-res)
       (swap!
        app-state #(-> %
@@ -103,6 +102,13 @@
              (get-in @app-state [:board x y :color])))
       (println "ILLEGAL")
 
+      (and
+       (= 1 (count move-arr))
+       (= id  (:id (first move-arr))))
+      (swap! app-state #(-> %
+                            (assoc :move [])
+                            (assoc-in [:board x y :clicked?] false)))
+
       :else
       (let [sx  (-> move-arr first :x name)
             sy  (-> move-arr first :y name)
@@ -116,6 +122,6 @@
 
   (move "2a4a")
 
-  @app-state
+ (:move @app-state)
 
   :end)

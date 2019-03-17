@@ -9,13 +9,13 @@
    [chess.fe.state    :as state]))
 
 (defn page [state]
-  [:div
-   [:div (str (dissoc @state :board))]
-   ;; [:div (str (:round @state))]
-   ;; [:div (str (:color @state))]
-   ;; [:div (str (:move @state))]
+  [:div views/page-style
+   [:div (views/info-style 100) (str "ROUND "   (:move @state))]
+   [:div (views/info-style 160) (str "POINTS: " (:points @state))]
+   [:div (views/info-style 260) (str "TURN: "   (:color  @state))]
+   [:div (views/info-style 340) (str "KILLS: "  (:kills  @state))]
+   [:div (assoc (views/info-style 440 true) :onClick #(state/update-start!)) "NEW GAME"]
    [:div (if (not= {} (:board @state)) (views/board (:board @state)) "click START GAME to begin")]
-   [:button {:onClick #(state/update-start!)} "START GAME"]
    ])
 
 (defn get-app-element []
@@ -26,6 +26,7 @@
 
 (defn mount-app-element []
   (when-let [el (get-app-element)]
+    (state/update-start!)
     (mount el)))
 
 (defn ^:after-load on-reload []

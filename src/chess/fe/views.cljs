@@ -34,18 +34,21 @@
 (defn square-style [row n color clicked?]
   {:style
    {:box-sizing       "border-box"
-    :color            (if (= :black color) "blue" "#000")
-    :width            "60px"
-    :height           "60px"
-    :border           "1px solid #0c60f0"
+    :color            (cond
+                        clicked?         "#000"
+                        (= :black color) "red"
+                        :else            "#fff")
+    :width            "5em"
+    :height           "5em"
+    :border           "1px solid #000"
     :margin           "6px 6px 0 0"
-    :padding          "20px 25px"
+    :padding          "1.75em 2.25em"
     :cursor           "pointer"
     :background-color (cond
                         clicked?                    "red"
-                        (and (odd?  row) (odd?  n)) "#dde"
-                        (and (even? row) (even? n)) "#dde"
-                        :else                       "#999")}})
+                        (and (odd?  row) (odd?  n)) "#999"
+                        (and (even? row) (even? n)) "#999"
+                        :else                       "#444")}})
 
 (def square-row-style
   {:style
@@ -69,9 +72,10 @@
 
 (def page-style
   {:style
-   {:height           "100%"
+   {:box-sizing       "border-box"
+    :height           "100%"
     :width            "100%"
-    :margin           "100px"
+    :padding          "2em 5em"
     :background-color "#222"}})
 
 (def body-style
@@ -82,6 +86,20 @@
   {:style
    {:color "#fff"
     :font-size "20px"}})
+
+(defn info-style [h & pointer?]
+  {:style
+   {:position   "fixed"
+    :top        (str h "px") 
+    :right      "10%"
+    :color      "#eee"
+    :cursor     (if pointer? "pointer" "arrow")
+    :width      "10em"
+    :text-align "center"
+    :padding    "10px"
+    :margin     "50px 0 0 0"
+    :box-sizing "border-box"
+    :border     "1px solid #eee"}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Markup
